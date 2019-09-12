@@ -1,0 +1,62 @@
+#
+# Copyright KOOMPI Co., LTD.
+# Copyright 2016 The PIONUX OS Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+#
+# PIONUX-specific init
+#
+
+on init
+
+    # 
+    # set up devices cgroup
+    #
+
+    mount tmpfs none /sys/fs/cgroup mode=0750,uid=0,gid=1000
+    mkdir /sys/fs/cgroup/devices 0750 root system
+    #chown root system /sys/fs/cgroup/devices
+    #chmod 0750 /sys/fs/cgroup/devices
+    mount cgroup none /sys/fs/cgroup/devices devices
+
+    #
+    # set up freezer cgroup
+    #
+    # Calling stop on an LXC container returns failure
+    # without this.
+    #
+    mkdir /sys/fs/cgroup/freezer 0750 root system
+    mount cgroup none /sys/fs/cgroup/freezer freezer
+
+on post-fs-data
+
+    # need to do this in init to get the
+    # pionux_file contexts right
+    mkdir /data/pionux 0770 system system
+
+
+service mflinger /system/bin/mflinger
+    class late_start
+    user graphics
+    group graphics
+    oneshot
+
+service perspectived /system/bin/perspectived
+    class late_start
+    oneshot
+
+service mcprepare /system/bin/mlogwrapper /system/bin/mcprepare
+    class late_start
+    oneshot

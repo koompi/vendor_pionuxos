@@ -1,0 +1,27 @@
+# mcprepare container utility
+type mcprepare, domain, coredomain;
+type mcprepare_exec, exec_type, file_type;
+
+# started by init
+init_daemon_domain(mcprepare)
+
+# #!/system/bin/sh
+allow mcprepare shell_exec:file rx_file_perms;
+
+# exec busybox, keeping scontext
+allow mcprepare busybox_exec:file execute_no_trans;
+allow mcprepare busybox_exec:file rx_file_perms;
+
+# busybox needs to exec writable memory for some reason...
+allow mcprepare self:process execmem;
+
+# extracting requires create perms, but
+# only for pionux_file scontext
+allow mcprepare pionux_file:dir create_dir_perms;
+allow mcprepare pionux_file:file { create_file_perms link };
+allow mcprepare pionux_file:lnk_file create_file_perms;
+
+allow mcprepare self:capability { dac_override chown fsetid fowner };
+
+# mknod is in a neverallow so we let mknods fail in the extraction (harmless)
+dontaudit mcprepare self:capability mknod;

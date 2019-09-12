@@ -1,0 +1,5 @@
+# pionux specific file types
+
+type pionux_file, file_type, data_file_type;
+
+type busybox_exec, exec_type, file_type;
